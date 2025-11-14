@@ -1,0 +1,23 @@
+# FastAPI and web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.18
+
+# Database
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Google Generative AI (Gemini)
+google-generativeai==0.8.3
+
+# HTTP client for .NET API calls
+httpx==0.28.1
+
+# Environment and configuration
+pydantic==2.10.4
+pydantic-settings==2.7.0
+python-dotenv==1.0.1
+
+# Utilities
+python-dateutil==2.9.0.post0
