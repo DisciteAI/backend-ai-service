@@ -28,8 +28,23 @@ This service provides intelligent, context-aware training sessions that adapt to
 │  PostgreSQL     │      │  PostgreSQL      │
 │  (.NET DB)      │      │  (AI Service DB) │
 │  Port 5432      │      │  Port 5433       │
+│                 │      │                  │
+│ - Users         │      │ - ChatSessions   │
+│ - Courses       │      │ - ChatMessages   │
+│ - Topics        │      │ - SessionContext │
+│ - Sessions      │      │                  │
+│ - UserProgress  │      │                  │
 └─────────────────┘      └──────────────────┘
 ```
+
+### Key Architecture Principles
+
+1. **Two separate session types:**
+   - **TrainingSession (.NET)**: Tracks overall training progress and enrollment
+   - **ChatSession (Python)**: Manages AI conversation for a specific topic
+2. **Python AI Service** manages conversation history and AI interactions
+3. **Retry logic with exponential backoff** on all .NET API calls
+4. **ChatSession links to .NET** via user_id, course_id, and topic_id
 
 ## Prerequisites
 
@@ -189,7 +204,7 @@ GET /api/health
 
 ## .NET API Integration
 
-The Python service calls these .NET endpoints:
+The Python service calls these .NET endpoints (all with automatic retry logic):
 
 ### Get User Context
 ```http
@@ -198,26 +213,28 @@ GET http://localhost:8080/api/UserProgress/{userId}/context
 
 Returns user level, completed topics, and struggle areas.
 
-### Notify Topic Completion
-```http
-POST http://localhost:8080/api/UserProgress/complete-topic
-Content-Type: application/json
-
-{
-  "user_id": 1,
-  "topic_id": 5,
-  "course_id": 2,
-  "completed_at": "2025-01-13T10:45:00Z",
-  "session_id": 123
-}
-```
-
 ### Get Topic Details
 ```http
 GET http://localhost:8080/api/TrainingTopics/{topicId}
 ```
 
 Returns topic details including prompt template and learning objectives.
+
+### Notify Topic Completion
+```http
+POST http://localhost:8080/api/UserProgress/complete-topic
+Content-Type: application/json
+
+{
+  "UserId": 1,
+  "TopicId": 5,
+  "CourseId": 2,
+  "CompletedAt": "2025-01-18T10:45:00Z",
+  "SessionId": 123
+}
+```
+
+Updates user progress tracking when topic is completed.
 
 ## Configuration
 
@@ -228,12 +245,24 @@ Returns topic details including prompt template and learning objectives.
 | `GEMINI_API_KEY` | Google Gemini API key | **Required** |
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://aiuser:aipass@localhost:5433/aitraining` |
 | `DOTNET_API_URL` | .NET backend URL | `http://localhost:8080` |
+| `DOTNET_API_TIMEOUT` | .NET API request timeout (seconds) | `30` |
+| `DOTNET_API_RETRY_ATTEMPTS` | Max retry attempts for .NET calls | `5` |
+| `DOTNET_API_RETRY_BASE_DELAY` | Initial retry delay (seconds) | `1.0` |
+| `DOTNET_API_RETRY_MAX_DELAY` | Max retry delay (seconds) | `60.0` |
+| `DOTNET_API_RETRY_EXPONENTIAL_BASE` | Exponential backoff base | `2.0` |
 | `GEMINI_MODEL` | Gemini model name | `gemini-1.5-flash` |
 | `GEMINI_TEMPERATURE` | AI response creativity (0.0-1.0) | `0.7` |
 | `MAX_CONVERSATION_HISTORY` | Max messages in context | `50` |
 | `COMPLETION_MARKER` | Marker for topic completion | `{TOPIC_COMPLETED}` |
 
 See `.env.example` for complete list.
+
+### Retry Logic
+
+All .NET API calls use automatic retry with exponential backoff:
+- **Default**: 5 attempts with delays of 1s, 2s, 4s, 8s, 16s
+- **Retries on**: Connection errors, timeouts, HTTP 5xx errors
+- **Ensures**: Session consistency even during temporary network issues
 
 ## Prompt Engineering
 
@@ -282,17 +311,25 @@ When student demonstrates understanding, include {completion_marker} in your res
 ### Tables
 
 **chat_sessions**
-- Stores active and completed training sessions
+- Stores active and completed AI chat sessions
 - Links to .NET user, course, and topic IDs
+- Tracks conversation status (active, completed, abandoned)
 
 **chat_messages**
 - Full conversation history
 - Roles: `system`, `user`, `assistant`
+- References local ChatSession
 
 **session_contexts**
-- User context snapshot for each session
+- User context snapshot for each chat session
 - Includes level, completed topics, struggles
 - Cached course/topic details
+
+### Session Management
+
+- **ChatSession (Python)**: Manages individual AI conversations for a topic
+- **TrainingSession (.NET)**: Tracks overall training enrollment and progress
+- These are separate but related - a TrainingSession can have multiple ChatSessions
 
 ### Migrations
 

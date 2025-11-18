@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     dotnet_api_timeout: int = 30
     service_api_key: Optional[str] = None  # For service-to-service auth
 
+    # Retry logic settings
+    dotnet_api_retry_attempts: int = 5
+    dotnet_api_retry_base_delay: float = 1.0  # seconds
+    dotnet_api_retry_max_delay: float = 60.0  # seconds
+    dotnet_api_retry_exponential_base: float = 2.0
+
     # Session settings
     max_conversation_history: int = 50  # Maximum messages to keep in context
     completion_marker: str = "{TOPIC_COMPLETED}"

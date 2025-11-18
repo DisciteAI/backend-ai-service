@@ -121,6 +121,43 @@ class CompleteTopicDTO(BaseModel):
         populate_by_name = True  # Allow both snake_case and PascalCase
 
 
+class CreateTrainingSessionDTO(BaseModel):
+    """DTO to create a new training session in .NET."""
+    user_id: int = Field(..., alias="UserId")
+    course_id: int = Field(..., alias="CourseId")
+    topic_id: int = Field(..., alias="TopicId")
+
+    class Config:
+        populate_by_name = True
+
+
+class TrainingSessionResponseDTO(BaseModel):
+    """DTO for training session details from .NET."""
+    id: int = Field(..., alias="Id")
+    user_id: int = Field(..., alias="UserId")
+    course_id: int = Field(..., alias="CourseId")
+    course_title: str = Field(..., alias="CourseTitle")
+    current_topic_id: int = Field(..., alias="CurrentTopicId")
+    current_topic_title: str = Field(..., alias="CurrentTopicTitle")
+    status: SessionStatus = Field(..., alias="Status")
+    started_at: datetime = Field(..., alias="StartedAt")
+    completed_at: Optional[datetime] = Field(None, alias="CompletedAt")
+
+    class Config:
+        populate_by_name = True
+        use_enum_values = True
+
+
+class UpdateSessionStatusDTO(BaseModel):
+    """DTO to update training session status in .NET."""
+    status: SessionStatus = Field(..., alias="Status")
+    completed_at: Optional[datetime] = Field(None, alias="CompletedAt")
+
+    class Config:
+        populate_by_name = True
+        use_enum_values = True
+
+
 # ============= Health Check Schema =============
 
 class HealthCheckResponse(BaseModel):
