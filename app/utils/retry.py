@@ -1,7 +1,3 @@
-"""
-Retry decorator with exponential backoff for handling transient failures.
-"""
-
 import asyncio
 import logging
 from functools import wraps
@@ -20,26 +16,6 @@ def retry_with_backoff(
     exponential_base: float = 2.0,
     exceptions: tuple = (httpx.HTTPError, httpx.TimeoutException, ConnectionError)
 ):
-    """
-    Decorator to retry async functions with exponential backoff.
-
-    Args:
-        max_attempts: Maximum number of retry attempts (default: 5)
-        base_delay: Initial delay in seconds between retries (default: 1.0)
-        max_delay: Maximum delay in seconds between retries (default: 60.0)
-        exponential_base: Base for exponential backoff calculation (default: 2.0)
-        exceptions: Tuple of exceptions to catch and retry (default: HTTP/connection errors)
-
-    Returns:
-        Decorated function with retry logic
-
-    Example:
-        @retry_with_backoff(max_attempts=3, base_delay=2.0)
-        async def fetch_data():
-            # This will retry up to 3 times with delays of 2s, 4s, 8s
-            return await http_client.get("/api/data")
-    """
-
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -59,7 +35,6 @@ def retry_with_backoff(
                         )
                         raise
 
-                    # Calculate delay with exponential backoff
                     delay = min(base_delay * (exponential_base ** (attempt - 1)), max_delay)
 
                     logger.warning(
@@ -69,7 +44,6 @@ def retry_with_backoff(
 
                     await asyncio.sleep(delay)
 
-            # This should never be reached, but just in case
             if last_exception:
                 raise last_exception
 
@@ -84,20 +58,6 @@ def retry_with_backoff_sync(
     exponential_base: float = 2.0,
     exceptions: tuple = (Exception,)
 ):
-    """
-    Synchronous version of retry_with_backoff for non-async functions.
-
-    Args:
-        max_attempts: Maximum number of retry attempts (default: 5)
-        base_delay: Initial delay in seconds between retries (default: 1.0)
-        max_delay: Maximum delay in seconds between retries (default: 60.0)
-        exponential_base: Base for exponential backoff calculation (default: 2.0)
-        exceptions: Tuple of exceptions to catch and retry (default: all exceptions)
-
-    Returns:
-        Decorated function with retry logic
-    """
-
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -118,7 +78,6 @@ def retry_with_backoff_sync(
                         )
                         raise
 
-                    # Calculate delay with exponential backoff
                     delay = min(base_delay * (exponential_base ** (attempt - 1)), max_delay)
 
                     logger.warning(
@@ -128,7 +87,6 @@ def retry_with_backoff_sync(
 
                     time.sleep(delay)
 
-            # This should never be reached, but just in case
             if last_exception:
                 raise last_exception
 

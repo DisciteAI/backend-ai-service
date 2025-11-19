@@ -1,7 +1,3 @@
-"""
-Database models for AI Training Service.
-"""
-
 from app.models.chat_session import (
     ChatSession,
     ChatMessage,

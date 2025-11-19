@@ -1,7 +1,3 @@
-"""
-Pydantic schemas for API request/response validation.
-"""
-
 from app.schemas.session import (
     StartSessionRequest,
     SendMessageRequest,

@@ -1,31 +1,20 @@
-"""
-Pydantic schemas for API request/response DTOs.
-"""
-
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
 from app.models import SessionStatus, MessageRole
 
 
-# ============= Request Schemas =============
-
 class StartSessionRequest(BaseModel):
-    """Request to start a new training session."""
     user_id: int = Field(..., description="ID of the user from .NET database", gt=0)
     topic_id: int = Field(..., description="ID of the training topic from .NET database", gt=0)
     course_id: int = Field(..., description="ID of the training course from .NET database", gt=0)
 
 
 class SendMessageRequest(BaseModel):
-    """Request to send a message in an active session."""
     message: str = Field(..., description="User's message to the AI", min_length=1, max_length=5000)
 
 
-# ============= Response Schemas =============
-
 class MessageResponse(BaseModel):
-    """Response containing a single chat message."""
     id: int
     role: MessageRole
     content: str
@@ -36,7 +25,6 @@ class MessageResponse(BaseModel):
 
 
 class SessionContextResponse(BaseModel):
-    """Response containing session context information."""
     user_level: Optional[str] = None
     course_title: Optional[str] = None
     topic_title: Optional[str] = None
@@ -47,7 +35,6 @@ class SessionContextResponse(BaseModel):
 
 
 class SessionResponse(BaseModel):
-    """Response containing session details."""
     id: int
     user_id: int
     topic_id: int
@@ -55,19 +42,18 @@ class SessionResponse(BaseModel):
     status: SessionStatus
     started_at: datetime
     completed_at: Optional[datetime] = None
+    initial_message: str = Field(..., description="AI's initial greeting message when session is created")
 
     class Config:
         from_attributes = True
 
 
 class SessionDetailResponse(SessionResponse):
-    """Detailed response including context and recent messages."""
     context: Optional[SessionContextResponse] = None
     messages: List[MessageResponse] = []
 
 
 class AIMessageResponse(BaseModel):
-    """Response containing AI's reply to user message."""
     session_id: int
     ai_message: str
     topic_completed: bool = Field(default=False, description="Whether the topic was completed after this message")
@@ -75,42 +61,35 @@ class AIMessageResponse(BaseModel):
 
 
 class TopicCompletionResponse(BaseModel):
-    """Response confirming topic completion."""
     session_id: int
     topic_id: int
     completed_at: datetime
     message: str = "Topic completed successfully!"
 
 
-# ============= .NET Integration Schemas =============
-
 class UserContextDTO(BaseModel):
-    """DTO for user context from .NET API."""
-    user_id: int = Field(..., alias="UserId")
     user_level: Optional[str] = Field(None, alias="UserLevel")
     completed_topic_ids: List[int] = Field(default_factory=list, alias="CompletedTopicIds")
     struggle_topics: List[str] = Field(default_factory=list, alias="StruggleTopics")
 
     class Config:
-        populate_by_name = True  # Allow both snake_case and PascalCase
+        populate_by_name = True
 
 
 class TopicDetailsDTO(BaseModel):
-    """DTO for topic details from .NET API."""
-    id: int = Field(..., alias="Id")
-    title: str = Field(..., alias="Title")
-    description: str = Field(..., alias="Description")
-    prompt_template: Optional[str] = Field(None, alias="PromptTemplate")
-    course_id: int = Field(..., alias="CourseId")
-    course_title: str = Field(..., alias="CourseTitle")
-    learning_objectives: Optional[str] = Field(None, alias="LearningObjectives")
+    id: int = Field(..., alias="id")
+    title: str = Field(..., alias="title")
+    description: str = Field(..., alias="description")
+    prompt_template: Optional[str] = Field(None, alias="promptTemplate")
+    course_id: int = Field(..., alias="courseId")
+    course_title: str = Field(..., alias="courseTitle")
+    learning_objectives: Optional[str] = Field(None, alias="learningObjectives")
 
     class Config:
-        populate_by_name = True  # Allow both snake_case and PascalCase
+        populate_by_name = True
 
 
 class CompleteTopicDTO(BaseModel):
-    """DTO to notify .NET about topic completion."""
     user_id: int = Field(..., alias="UserId")
     topic_id: int = Field(..., alias="TopicId")
     course_id: int = Field(..., alias="CourseId")
@@ -118,11 +97,32 @@ class CompleteTopicDTO(BaseModel):
     session_id: int = Field(..., alias="SessionId")
 
     class Config:
-        populate_by_name = True  # Allow both snake_case and PascalCase
+        populate_by_name = True
+
+
+class CompletedTopicInfoDTO(BaseModel):
+    id: int = Field(..., alias="Id")
+    title: str = Field(..., alias="Title")
+
+    class Config:
+        populate_by_name = True
+
+
+class CourseProgressDTO(BaseModel):
+    user_id: int = Field(..., alias="UserId")
+    course_id: int = Field(..., alias="CourseId")
+    course_title: str = Field(..., alias="CourseTitle")
+    progress_percentage: float = Field(..., alias="ProgressPercentage")
+    completed_topics_count: int = Field(..., alias="CompletedTopicsCount")
+    total_topics_count: int = Field(..., alias="TotalTopicsCount")
+    completed_topics: List[CompletedTopicInfoDTO] = Field(default_factory=list, alias="CompletedTopics")
+    last_accessed_at: Optional[datetime] = Field(None, alias="LastAccessedAt")
+
+    class Config:
+        populate_by_name = True
 
 
 class CreateTrainingSessionDTO(BaseModel):
-    """DTO to create a new training session in .NET."""
     user_id: int = Field(..., alias="UserId")
     course_id: int = Field(..., alias="CourseId")
     topic_id: int = Field(..., alias="TopicId")
@@ -132,7 +132,6 @@ class CreateTrainingSessionDTO(BaseModel):
 
 
 class TrainingSessionResponseDTO(BaseModel):
-    """DTO for training session details from .NET."""
     id: int = Field(..., alias="Id")
     user_id: int = Field(..., alias="UserId")
     course_id: int = Field(..., alias="CourseId")
@@ -149,7 +148,6 @@ class TrainingSessionResponseDTO(BaseModel):
 
 
 class UpdateSessionStatusDTO(BaseModel):
-    """DTO to update training session status in .NET."""
     status: SessionStatus = Field(..., alias="Status")
     completed_at: Optional[datetime] = Field(None, alias="CompletedAt")
 
@@ -158,10 +156,7 @@ class UpdateSessionStatusDTO(BaseModel):
         use_enum_values = True
 
 
-# ============= Health Check Schema =============
-
 class HealthCheckResponse(BaseModel):
-    """Health check response."""
     status: str = "healthy"
     service: str = "AI Training Service"
     timestamp: datetime

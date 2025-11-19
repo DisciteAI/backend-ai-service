@@ -1,7 +1,3 @@
-"""
-API routes for training session management.
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
@@ -28,17 +24,6 @@ async def start_session(
     request: StartSessionRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Start a new AI training session for a user and topic.
-
-    This endpoint:
-    1. Fetches topic details and user context from .NET API
-    2. Builds a personalized system prompt
-    3. Initializes a Gemini AI chat session
-    4. Saves session and context to database
-
-    Returns the created session details.
-    """
     try:
         session_manager = SessionManager()
         session = await session_manager.start_session(request, db)
@@ -64,18 +49,6 @@ async def send_message(
     request: SendMessageRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Send a user message to an active training session and receive AI response.
-
-    This endpoint:
-    1. Validates the session is active
-    2. Sends user message to Gemini AI with full conversation context
-    3. Checks if topic completion criteria are met
-    4. Notifies .NET API if topic is completed
-    5. Returns AI response and completion status
-
-    If topic is completed, the session status is updated to COMPLETED.
-    """
     try:
         session_manager = SessionManager()
         response = await session_manager.send_message(
@@ -104,14 +77,6 @@ async def get_session(
     session_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Get detailed information about a training session.
-
-    Returns:
-    - Session metadata (status, timestamps)
-    - Session context (user level, topic details)
-    - Full conversation history (excluding system prompt)
-    """
     try:
         session_manager = SessionManager()
         session = await session_manager.get_session_details(session_id, db)
@@ -136,14 +101,6 @@ async def get_session(
 
 @router.get("/health", response_model=HealthCheckResponse, tags=["health"])
 async def health_check():
-    """
-    Health check endpoint for monitoring service status.
-
-    Checks:
-    - API is running
-    - Database connectivity
-    - Gemini API configuration
-    """
     return HealthCheckResponse(
         status="healthy",
         service="AI Training Service",
