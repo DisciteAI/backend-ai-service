@@ -8,24 +8,19 @@ from alembic import context
 import sys
 from pathlib import Path
 
-# Add app directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import settings
 from app.database import Base
-from app.models import ChatSession, ChatMessage, SessionContext  # Import all models
+from app.models import ChatSession, ChatMessage, SessionContext
 
-# this is the Alembic Config object
 config = context.config
 
-# Override sqlalchemy.url with our DATABASE_URL from settings
 config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 
-# Interpret the config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Add your model's MetaData object here for 'autogenerate' support
 target_metadata = Base.metadata
 
 
