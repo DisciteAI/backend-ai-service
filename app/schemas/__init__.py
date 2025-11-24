@@ -10,9 +10,7 @@ from app.schemas.session import (
     UserContextDTO,
     TopicDetailsDTO,
     CompleteTopicDTO,
-    CreateTrainingSessionDTO,
-    TrainingSessionResponseDTO,
-    UpdateSessionStatusDTO,
+    CourseProgressDTO,
     HealthCheckResponse
 )
 
@@ -28,8 +26,6 @@ __all__ = [
     "UserContextDTO",
     "TopicDetailsDTO",
     "CompleteTopicDTO",
-    "CreateTrainingSessionDTO",
-    "TrainingSessionResponseDTO",
-    "UpdateSessionStatusDTO",
+    "CourseProgressDTO",
     "HealthCheckResponse"
 ]

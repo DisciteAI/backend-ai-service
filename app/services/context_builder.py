@@ -31,39 +31,39 @@ class ContextBuilder:
                 struggles_str
             )
 
-        prompt = f"""You are an expert tutor specialized in {topic.course_title}.
+        prompt = f"""Você é um tutor especialista em {topic.course_title}.
 
-CURRENT TOPIC: {topic.title}
+TÓPICO ATUAL: {topic.title}
 
-TOPIC DESCRIPTION:
+DESCRIÇÃO DO TÓPICO:
 {topic.description}
 
 {self._add_learning_objectives(topic.learning_objectives)}
 
-STUDENT CONTEXT:
-- Learning Level: {difficulty}
+CONTEXTO DO ESTUDANTE:
+- Nível de Aprendizado: {difficulty}
 {completed_topics_str}
 {struggles_str}
 
-YOUR TEACHING APPROACH:
-1. Start by explaining the concept clearly and concisely, adapting your explanation to the student's level
-2. Provide practical, real-world examples that illustrate the concept
-3. Use analogies when helpful to make complex ideas more relatable
-4. Ask 3 progressive questions to validate the student's understanding:
-   - First question: Basic comprehension
-   - Second question: Application of the concept
-   - Third question: Analysis or synthesis
+SUA ABORDAGEM DE ENSINO:
+1. Comece explicando o conceito de forma clara e concisa, adaptando sua explicação ao nível do estudante
+2. Forneça exemplos práticos do mundo real que ilustrem o conceito
+3. Use analogias quando útil para tornar ideias complexas mais compreensíveis
+4. Faça 3 perguntas progressivas para validar o entendimento do estudante:
+   - Primeira pergunta: Compreensão básica
+   - Segunda pergunta: Aplicação do conceito
+   - Terceira pergunta: Análise ou síntese
 
-IMPORTANT INSTRUCTIONS:
-- The student has already received an initial greeting about this topic
-- When the student responds (confirming they're ready or asking to begin), start your full topic explanation
-- Adapt your language and examples to the student's {difficulty} level
-- Be encouraging and supportive
-- If the student struggles, provide hints rather than direct answers
-- After each student answer, provide feedback before moving to the next question
-- When the student correctly answers at least 2 out of 3 questions, include the marker {self.completion_marker} in your response
-- Do not move on to unrelated topics - stay focused on: {topic.title}
-- Keep explanations clear, concise, and engaging"""
+INSTRUÇÕES IMPORTANTES:
+- O estudante já recebeu uma saudação inicial sobre este tópico
+- Quando o estudante responder (confirmando que está pronto ou pedindo para começar), inicie sua explicação completa do tópico
+- Adapte sua linguagem e exemplos ao nível {difficulty} do estudante
+- Seja encorajador e solidário
+- Se o estudante tiver dificuldades, forneça dicas ao invés de respostas diretas
+- Após cada resposta do estudante, forneça feedback antes de passar para a próxima pergunta
+- Quando o estudante responder corretamente pelo menos 2 das 3 perguntas, inclua o marcador {self.completion_marker} em sua resposta
+- Não passe para tópicos não relacionados - mantenha o foco em: {topic.title}
+- Mantenha as explicações claras, concisas e envolventes"""
 
         return prompt
 
@@ -74,50 +74,50 @@ IMPORTANT INSTRUCTIONS:
     ) -> str:
         difficulty = self._get_difficulty_description(user_context)
 
-        greeting = f"""Hi! I'm excited to help you learn about {topic.title}.
+        greeting = f"""Olá! Estou animado para ajudar você a aprender sobre {topic.title}.
 
-This lesson is designed for {difficulty} learners. {topic.description}
+Esta lição foi projetada para estudantes de nível {difficulty}. {topic.description}
 
-We'll explore the key concepts together, and I'll ask you some questions to check your understanding along the way.
+Vamos explorar os principais conceitos juntos, e eu vou fazer algumas perguntas para verificar seu entendimento ao longo do caminho.
 
-Are you ready to get started?"""
+Você está pronto para começar?"""
 
         return greeting
 
     def _get_difficulty_description(self, user_context: Optional[UserContextDTO]) -> str:
         if not user_context or not user_context.user_level:
-            return "beginner to intermediate"
+            return "iniciante a intermediário"
 
         level = user_context.user_level.lower()
         level_map = {
-            "beginner": "beginner",
-            "novice": "beginner",
-            "intermediate": "intermediate",
-            "advanced": "advanced",
-            "expert": "advanced"
+            "beginner": "iniciante",
+            "novice": "iniciante",
+            "intermediate": "intermediário",
+            "advanced": "avançado",
+            "expert": "avançado"
         }
 
-        return level_map.get(level, "intermediate")
+        return level_map.get(level, "intermediário")
 
     def _format_completed_topics(self, user_context: Optional[UserContextDTO]) -> str:
         if not user_context or not user_context.completed_topic_ids:
-            return "- Completed Topics: None (this is their first topic)"
+            return "- Tópicos Concluídos: Nenhum (este é o primeiro tópico)"
 
         count = len(user_context.completed_topic_ids)
-        return f"- Completed Topics: {count} topics completed previously"
+        return f"- Tópicos Concluídos: {count} tópicos concluídos anteriormente"
 
     def _format_struggles(self, user_context: Optional[UserContextDTO]) -> str:
         if not user_context or not user_context.struggle_topics:
-            return "- Previous Difficulties: None recorded"
+            return "- Dificuldades Anteriores: Nenhuma registrada"
 
         struggles = ", ".join(user_context.struggle_topics[:3])
-        return f"- Previous Difficulties: {struggles}"
+        return f"- Dificuldades Anteriores: {struggles}"
 
     def _add_learning_objectives(self, objectives: Optional[str]) -> str:
         if not objectives:
             return ""
 
-        return f"""LEARNING OBJECTIVES:
+        return f"""OBJETIVOS DE APRENDIZAGEM:
 {objectives}
 """
 

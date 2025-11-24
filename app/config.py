@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     max_conversation_history: int = 50
     completion_marker: str = "{TOPIC_COMPLETED}"
 
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+    cors_origins: list[str] = ["*"]
 
     @property
     def database_url_sync(self) -> str:

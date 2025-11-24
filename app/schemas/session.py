@@ -90,11 +90,11 @@ class TopicDetailsDTO(BaseModel):
 
 
 class CompleteTopicDTO(BaseModel):
-    user_id: int = Field(..., alias="UserId")
-    topic_id: int = Field(..., alias="TopicId")
-    course_id: int = Field(..., alias="CourseId")
-    completed_at: datetime = Field(..., alias="CompletedAt")
-    session_id: int = Field(..., alias="SessionId")
+    user_id: int = Field(..., alias="userId")
+    topic_id: int = Field(..., alias="topicId")
+    course_id: int = Field(..., alias="courseId")
+    completed_at: datetime = Field(..., alias="completedAt")
+    session_id: int = Field(..., alias="sessionId")
 
     class Config:
         populate_by_name = True
@@ -120,40 +120,6 @@ class CourseProgressDTO(BaseModel):
 
     class Config:
         populate_by_name = True
-
-
-class CreateTrainingSessionDTO(BaseModel):
-    user_id: int = Field(..., alias="UserId")
-    course_id: int = Field(..., alias="CourseId")
-    topic_id: int = Field(..., alias="TopicId")
-
-    class Config:
-        populate_by_name = True
-
-
-class TrainingSessionResponseDTO(BaseModel):
-    id: int = Field(..., alias="Id")
-    user_id: int = Field(..., alias="UserId")
-    course_id: int = Field(..., alias="CourseId")
-    course_title: str = Field(..., alias="CourseTitle")
-    current_topic_id: int = Field(..., alias="CurrentTopicId")
-    current_topic_title: str = Field(..., alias="CurrentTopicTitle")
-    status: SessionStatus = Field(..., alias="Status")
-    started_at: datetime = Field(..., alias="StartedAt")
-    completed_at: Optional[datetime] = Field(None, alias="CompletedAt")
-
-    class Config:
-        populate_by_name = True
-        use_enum_values = True
-
-
-class UpdateSessionStatusDTO(BaseModel):
-    status: SessionStatus = Field(..., alias="Status")
-    completed_at: Optional[datetime] = Field(None, alias="CompletedAt")
-
-    class Config:
-        populate_by_name = True
-        use_enum_values = True
 
 
 class HealthCheckResponse(BaseModel):
